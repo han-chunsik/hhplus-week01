@@ -39,6 +39,7 @@ lv.2
 ## 요건 분석 및 설계
 ### 테이블
 - UserPointTable
+
 |컬럼 명|타입|설명|
 |---|---|---|
 |id|long|사용자 식별 id|
@@ -46,6 +47,7 @@ lv.2
 |updateMillis|long|업데이트 일자(밀리초 단위, 타임스탬프)|
 
 - PointHistoryTable
+
 |컬럼 명|타입|설명|
 |---|---|---|
 |id|long|트랜잭션 식별 id|
