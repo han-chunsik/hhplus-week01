@@ -13,6 +13,7 @@ import java.util.List;
 
 @Service
 public class PointService {
+    private static final long MAX_POINT = 1000L;
 
     private static final Logger log = LoggerFactory.getLogger(PointService.class);
 
@@ -55,14 +56,18 @@ public class PointService {
      * @param amount
      * @return UserPoint
      */
-    public UserPoint changePoint(long id, long amount) {
+    public UserPoint chargePoint(long id, long amount) {
         // 포인트 충전
-        UserPoint cruuntUserPoint = getPoint(id);
+        UserPoint cruuntUserPoint = getPointSafely(id);
+        if (cruuntUserPoint == null) {
+            userPointTable.insertOrUpdate(id, 0);
+            cruuntUserPoint = getPoint(id);
+        }
 
         long chargedPoint;
 
-        if ((cruuntUserPoint.point() + amount) > 1000) {
-            throw new RuntimeException("포인트는 최대 1000까지 충전 가능합니다.");
+        if ((cruuntUserPoint.point() + amount) > MAX_POINT) {
+            throw new RuntimeException("충전 가능한 최대 포인트는 1000 입니다.");
         }else{
             chargedPoint = cruuntUserPoint.point() + amount;
         }
@@ -73,7 +78,7 @@ public class PointService {
             throw new RuntimeException("포인트 충전에 실패했습니다.");
         }
 
-        PointHistory pointHistory = pointHistoryTable.insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
+        pointHistoryTable.insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
         return userPoint;
     }
 
@@ -100,7 +105,7 @@ public class PointService {
             throw new RuntimeException("포인트 사용에 실패했습니다.");
         }
 
-        PointHistory pointHistory = pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
+        pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
         return userPoint;
     }
 
@@ -111,5 +116,13 @@ public class PointService {
             throw new RuntimeException("조회 결과가 없습니다.");
         }
         return cruuntUserPoint;
+    }
+
+    private UserPoint getPointSafely(long id) {
+        try {
+            return getPoint(id);
+        } catch (Exception e) {
+            return null; // 예외가 발생하면 null을 반환
+        }
     }
 }

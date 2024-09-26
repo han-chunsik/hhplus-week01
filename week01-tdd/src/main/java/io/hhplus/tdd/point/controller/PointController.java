@@ -3,6 +3,7 @@ package io.hhplus.tdd.point.controller;
 import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.UserPoint;
 import io.hhplus.tdd.point.service.PointService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +17,24 @@ public class PointController {
 
     private static final Logger log = LoggerFactory.getLogger(PointController.class);
 
-    private PointService pointService;
+    private final PointService pointService;
     public PointController(PointService pointService) {
         this.pointService = pointService;
     }
-
+    @GetMapping("/")
+    public String home() {
+        return "홈페이지입니다.";
+    }
     /**
      * 특정 유저의 포인트를 조회하는 기능
      * @param id 유저 ID
      * @return UserPoint
      */
-    @GetMapping("{id}")
-    public UserPoint point(@PathVariable long id) throws Exception {
+    @GetMapping("/{id}")
+    public UserPoint point(@PathVariable(name = "id") long id) throws Exception {
         validLong(id);
 
-        UserPoint userPoint = pointService.getUserPoint(id);
-        return userPoint;
+        return pointService.getUserPoint(id);
     }
 
     /**
@@ -43,8 +46,7 @@ public class PointController {
     public List<PointHistory> history(@PathVariable long id) throws Exception {
         validLong(id);
 
-        List<PointHistory> pointHistories = pointService.getPointHistory(id);
-        return pointHistories;
+        return pointService.getPointHistory(id);
     }
 
     /**
@@ -58,8 +60,7 @@ public class PointController {
         validLong(id);
         validLong(amount);
 
-        UserPoint userPoint = pointService.changePoint(id, amount);
-        return userPoint;
+        return pointService.chargePoint(id, amount);
     }
 
     /**
@@ -73,8 +74,7 @@ public class PointController {
         validLong(id);
         validLong(amount);
 
-        UserPoint userPoint = pointService.usePoint(id, amount);
-        return userPoint;
+        return pointService.usePoint(id, amount);
     }
 
     private static void validLong(long num) throws Exception {
